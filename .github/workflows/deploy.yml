@@ -22,21 +22,27 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
+        # Make sure @aws-sdk is in devDependencies in package.json so this command ignores it!
         run: npm ci --production
 
       - name: Zip Lambda function
         run: |
-          # Move into the src directory and zip from there to ensure index.js is at root
           cd src
           cp -r ../node_modules .
           zip -r ../deploy.zip .
           cd ..
 
-      - name: Deploy to AWS Lambda
-        uses: appleboy/lambda-action@v0.2.0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_region: eu-north-1
-          function_name: ${{ github.ref == 'refs/heads/main' && 'process-contact-requests' || 'process-contact-requests' }}
-          zip_file: deploy.zip
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+
+      - name: Deploy to AWS Lambda
+        # Using the official AWS CLI directly prevents those endless hanging loops
+        run: |
+          FUNCTION_NAME="${{ github.ref == 'refs/heads/main' && 'process-contact-requests' || 'process-contact-requests' }}"
+          aws lambda update-function-code \
+            --function-name $FUNCTION_NAME \
+            --zip-file fileb://deploy.zip
