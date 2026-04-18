@@ -26,12 +26,12 @@ jobs:
 
       - name: Zip Lambda function
         run: |
-          # 1. Grab everything inside src and put it at the root of the zip
-          zip -j deploy.zip src/*
-          # 2. Add package.json to the root
-          zip -g deploy.zip package.json
-          # 3. Recursively add the node_modules folder
-          zip -r -g deploy.zip node_modules
+          # 1. Flatten the src files so index.js is at the root
+          cp -r src/* .
+
+          # 2. Create the zip including the files and the node_modules folder
+          # We use -r for recursive (node_modules) and avoid zipping the zip itself
+          zip -r deploy.zip . -x "*.git*" ".github*" "src/*" "deploy.zip"
 
       - name: Deploy to AWS Lambda
         uses: appleboy/lambda-action@v0.2.0
