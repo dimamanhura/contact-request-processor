@@ -2,7 +2,9 @@ const { sendMessage } = require("./telegram.js");
 
 exports.handler = async (event) => {
   try {
-    const body = event.body ? JSON.parse(event.body) : event;
+    const record = event.Records[0];
+    const body = JSON.parse(record.body);
+
     const { message, email, name } = body;
 
     console.log("------- BODY:", body);
