@@ -5,6 +5,8 @@ exports.handler = async (event) => {
     const body = event.body ? JSON.parse(event.body) : event;
     const { message, email, name } = body;
 
+    console.log("------- BODY:", body);
+
     if (!message || !email || !name) {
       return {
         statusCode: 400,
