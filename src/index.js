@@ -10,7 +10,7 @@ exports.handler = async (event) => {
         statusCode: 400,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          error: "Missing required fields: message, email, name.",
+          error: "Missing required fields: message, email or name.",
         }),
       };
     }
