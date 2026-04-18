@@ -26,18 +26,17 @@ jobs:
 
       - name: Zip Lambda function
         run: |
-          # 1. Flatten the src files so index.js is at the root
-          cp -r src/* .
-
-          # 2. Create the zip including the files and the node_modules folder
-          # We use -r for recursive (node_modules) and avoid zipping the zip itself
-          zip -r deploy.zip . -x "*.git*" ".github*" "src/*" "deploy.zip"
+          # Move into the src directory and zip from there to ensure index.js is at root
+          cd src
+          cp -r ../node_modules .
+          zip -r ../deploy.zip .
+          cd ..
 
       - name: Deploy to AWS Lambda
-        uses: appleboy/lambda-action@v0.2.0
+        uses: appleboy/lambda-action@v0.2.1
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: eu-north-1
-          function_name: ${{ github.ref == 'refs/heads/main' && 'process-contact-requests' || 'process-contact-requests' }}
+          function_name: process-contact-requests
           zip_file: deploy.zip
