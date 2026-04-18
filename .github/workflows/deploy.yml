@@ -26,9 +26,11 @@ jobs:
 
       - name: Zip Lambda function
         run: |
-          cd src && zip -r ../deploy.zip .
-          cd ..
+          # 1. Grab everything inside src and put it at the root of the zip
+          zip -j deploy.zip src/*
+          # 2. Add package.json to the root
           zip -g deploy.zip package.json
+          # 3. Recursively add the node_modules folder
           zip -r -g deploy.zip node_modules
 
       - name: Deploy to AWS Lambda
