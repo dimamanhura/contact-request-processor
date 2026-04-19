@@ -18,9 +18,7 @@ exports.handler = async (event) => {
       };
     }
 
-    const result = await classifyRequest({ message, email, name });
-
-    console.log("RESULT: ", result);
+    const { status, reason } = await classifyRequest({ message, email, name });
 
     const telegramResponse = await sendMessage({ message, email, name });
 
