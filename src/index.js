@@ -1,3 +1,4 @@
+const { classifyRequest } = require("./bedrock.js");
 const { sendMessage } = require("./telegram.js");
 
 exports.handler = async (event) => {
@@ -6,8 +7,6 @@ exports.handler = async (event) => {
     const body = JSON.parse(record.body);
 
     const { message, email, name } = body;
-
-    console.log("------- BODY:", body);
 
     if (!message || !email || !name) {
       return {
@@ -18,6 +17,10 @@ exports.handler = async (event) => {
         }),
       };
     }
+
+    const result = await classifyRequest({ message, email, name });
+
+    console.log("RESULT: ", result);
 
     const telegramResponse = await sendMessage({ message, email, name });
 
