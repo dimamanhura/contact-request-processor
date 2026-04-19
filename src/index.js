@@ -20,6 +20,8 @@ exports.handler = async (event) => {
 
     const { status, reason } = await classifyRequest({ message, email, name });
 
+    console.log("STATUS: ", { status, reason });
+
     const telegramResponse = await sendMessage({ message, email, name });
 
     if (!telegramResponse.ok) {
