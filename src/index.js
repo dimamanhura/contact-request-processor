@@ -24,7 +24,7 @@ exports.handler = async (event) => {
 
     console.log(`Categorized as: ${status} - ${reason}`);
 
-    if (!ObjectId.isValid(idString)) {
+    if (!ObjectId.isValid(id)) {
       console.warn("Invalid ID format");
     } else {
       const db = await connectToDatabase();
