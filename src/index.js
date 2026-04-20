@@ -33,7 +33,7 @@ exports.handler = async (event) => {
     });
 
     const updateResult = await collection.updateOne(
-      { id },
+      { _id: id },
       { $set: { status, reason } }
     );
 
