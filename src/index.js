@@ -2,6 +2,7 @@ const { classifyRequest } = require("./bedrock.js");
 const { sendMessage } = require("./telegram.js");
 const { connectToDatabase } = require("./db.js");
 const { ObjectId } = require("mongodb");
+const { CONTACT_REQUEST_STATUSES } = require("./constants.js");
 
 exports.handler = async (event) => {
   try {
@@ -45,18 +46,31 @@ exports.handler = async (event) => {
       }
     }
 
-    const telegramResponse = await sendMessage({ message, email, name });
+    if (
+      [
+        CONTACT_REQUEST_STATUSES.CRITICAL,
+        CONTACT_REQUEST_STATUSES.GENERAL,
+      ].includes(status)
+    ) {
+      const telegramResponse = await sendMessage({
+        message,
+        status,
+        reason,
+        email,
+        name,
+      });
 
-    if (!telegramResponse.ok) {
-      const errorData = await telegramResponse.text();
-      console.error("Telegram API Error:", errorData);
-      return {
-        statusCode: 502,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          error: "Failed to forward message to Telegram.",
-        }),
-      };
+      if (!telegramResponse.ok) {
+        const errorData = await telegramResponse.text();
+        console.error("Telegram API Error:", errorData);
+        return {
+          statusCode: 502,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            error: "Failed to forward message to Telegram.",
+          }),
+        };
+      }
     }
 
     return {

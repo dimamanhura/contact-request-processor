@@ -2,6 +2,7 @@ const {
   BedrockRuntimeClient,
   InvokeModelCommand,
 } = require("@aws-sdk/client-bedrock-runtime");
+const { CONTACT_REQUEST_STATUSES } = require("./constants");
 
 const client = new BedrockRuntimeClient({ region: "us-east-1" });
 
@@ -12,19 +13,20 @@ async function classifyRequest({ name, email, message }) {
     categorize it into one of the exact statuses provided.
 
     STATUS DEFINITIONS:
-      - spam: Bot submissions, phishing attempts, and obvious junk.
-      - solicitation: SEO agencies, offshore development offers, and unsolicited marketing.
-      - general: Networking requests, casual questions, or non-urgent greetings.
-      - critical: High-value business opportunities, urgent site issues (e.g., payment failures), or direct job offers.
-      - no_reply_needed: Simple "thank you" messages or automated replies.
+      - ${CONTACT_REQUEST_STATUSES.SPAM}: Bot submissions, phishing attempts, and obvious junk.
+      - ${CONTACT_REQUEST_STATUSES.SOLICITATION}: SEO agencies, offshore development offers, and unsolicited marketing.
+      - ${CONTACT_REQUEST_STATUSES.GENERAL}: Networking requests, casual questions, or non-urgent greetings.
+      - ${CONTACT_REQUEST_STATUSES.CRITICAL}: High-value business opportunities, urgent site issues (e.g., payment failures), or direct job offers.
+      - ${CONTACT_REQUEST_STATUSES.NO_REPLY_NEEDED}: Simple "thank you" messages or automated replies.
 
     OUTPUT RULES:
-    You must output ONLY a raw, valid JSON object. Do not include markdown formatting (like \`\`\`json). Do not add any conversational text.
-    The JSON must follow this exact schema:
-    {
-      "status": "<INSERT_EXACT_STATUS_NAME>",
-      "reason": "<A brief 1-sentence explanation of why you chose this status>"
-  }`;
+      You must output ONLY a raw, valid JSON object. Do not include markdown formatting (like \`\`\`json). Do not add any conversational text.
+      The JSON must follow this exact schema:
+        { 
+          "status": "<INSERT_EXACT_STATUS_NAME>",
+          "reason": "<A brief 1-sentence explanation of why you chose this status>"
+        }
+    `;
 
   const userMessage = `
     Please classify the following contact request:
