@@ -18,7 +18,7 @@ const sendMessage = async ({ message, email, name, status, reason }) => {
     `\`\`\``,
     message,
     `\`\`\``,
-  ].join("\n");
+  ];
 
   const response = await fetch(
     `https://api.telegram.org/bot${botToken}/sendMessage`,
