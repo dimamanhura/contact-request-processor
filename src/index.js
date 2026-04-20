@@ -27,6 +27,11 @@ exports.handler = async (event) => {
 
     const collection = db.collection("ContactRequest");
 
+    console.log({
+      collection,
+      id,
+    });
+
     const updateResult = await collection.updateOne(
       { id },
       { $set: { status, reason } }
