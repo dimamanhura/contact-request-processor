@@ -1,26 +1,44 @@
 const { classifyRequest } = require("./bedrock.js");
 const { sendMessage } = require("./telegram.js");
+const { connectToDatabase } = require("./db.js");
 
 exports.handler = async (event) => {
   try {
     const record = event.Records[0];
     const body = JSON.parse(record.body);
 
-    const { message, email, name } = body;
+    const { message, email, name, id } = body;
 
-    if (!message || !email || !name) {
+    if (!message || !email || !name || !id) {
       return {
         statusCode: 400,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          error: "Missing required fields: message, email or name.",
+          error: "Missing required fields: message, email, name or id.",
         }),
       };
     }
 
     const { status, reason } = await classifyRequest({ message, email, name });
 
-    console.log("STATUS: ", { status, reason });
+    console.log(`Categorized as: ${status} - ${reason}`);
+
+    const db = await connectToDatabase();
+
+    const collection = db.collection("ContactRequest");
+
+    const updateResult = await collection.updateOne(
+      { id },
+      { $set: { status, reason } }
+    );
+
+    if (updateResult.matchedCount === 0) {
+      console.warn(
+        "Could not find matching record in DB to update. Was it saved by Next.js?"
+      );
+    } else {
+      console.log("Successfully updated existing record with AI status.");
+    }
 
     const telegramResponse = await sendMessage({ message, email, name });
 
