@@ -50,6 +50,7 @@ exports.handler = async (event) => {
       [
         CONTACT_REQUEST_STATUSES.CRITICAL,
         CONTACT_REQUEST_STATUSES.GENERAL,
+        CONTACT_REQUEST_STATUSES.SOLICITATION,
       ].includes(status)
     ) {
       const telegramResponse = await sendMessage({
