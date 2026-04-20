@@ -18,7 +18,7 @@ const STATUS_MAP = {
   },
 };
 
-export const getStatusConfig = (status) => {
+const getStatusConfig = (status) => {
   return STATUS_MAP[status] || { label: "🔍 UNKNOWN CATEGORY", silent: true };
 };
 
