@@ -1,6 +1,7 @@
 const { classifyRequest } = require("./bedrock.js");
 const { sendMessage } = require("./telegram.js");
 const { connectToDatabase } = require("./db.js");
+const { ObjectId } = require("mongodb");
 
 exports.handler = async (event) => {
   try {
@@ -23,26 +24,25 @@ exports.handler = async (event) => {
 
     console.log(`Categorized as: ${status} - ${reason}`);
 
-    const db = await connectToDatabase();
-
-    const collection = db.collection("ContactRequest");
-
-    console.log({
-      collection,
-      id,
-    });
-
-    const updateResult = await collection.updateOne(
-      { _id: id },
-      { $set: { status, reason } }
-    );
-
-    if (updateResult.matchedCount === 0) {
-      console.warn(
-        "Could not find matching record in DB to update. Was it saved by Next.js?"
-      );
+    if (!ObjectId.isValid(idString)) {
+      console.warn("Invalid ID format");
     } else {
-      console.log("Successfully updated existing record with AI status.");
+      const db = await connectToDatabase();
+
+      const updateResult = await db
+        .collection("ContactRequest")
+        .updateOne(
+          { _id: ObjectId.createFromHexString(id) },
+          { $set: { status, reason } }
+        );
+
+      if (updateResult.matchedCount === 0) {
+        console.warn(
+          "Could not find matching record in DB to update. Was it saved by Next.js?"
+        );
+      } else {
+        console.log("Successfully updated existing record with AI status.");
+      }
     }
 
     const telegramResponse = await sendMessage({ message, email, name });
