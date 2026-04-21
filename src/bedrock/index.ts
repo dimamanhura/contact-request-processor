@@ -11,6 +11,7 @@ import systemPrompt from "./system-prompt";
 import { extractAgentResponse } from "./utils";
 import config from "./config";
 import getPrompt from "./prompt";
+import { logger } from "../logger";
 
 const client = new BedrockRuntimeClient({ region: config.REGION });
 
@@ -40,11 +41,23 @@ export async function classifyRequest({
   });
 
   try {
+    logger.debug("Sending request to Bedrock", { modelId: config.MODEL_ID });
+
     const response = await client.send(command);
+
+    logger.debug("Bedrock classification successful");
     return extractAgentResponse(response);
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("Bedrock Classification Error:", errorMessage);
+
+    logger.error("Bedrock Classification Error", {
+      error: error instanceof Error ? error : new Error(errorMessage),
+      modelId: config.MODEL_ID,
+    });
+
+    logger.warn("Using fallback classification due to Bedrock error", {
+      fallbackStatus: ContactRequestStatus.GENERAL,
+    });
 
     return {
       status: ContactRequestStatus.GENERAL,

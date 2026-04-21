@@ -1,5 +1,6 @@
 import { MongoClient, Db, ObjectId } from "mongodb";
 import { UpdateStatusParams } from "./types";
+import { logger } from "./logger";
 
 let cachedDb: Db | null = null;
 
@@ -20,10 +21,13 @@ export async function connectToDatabase(uri: string): Promise<Db> {
 export async function updateContactRequestStatus(
   { id, status, reason }: UpdateStatusParams,
   uri: string
-): Promise<void> {
+): Promise<{ success: boolean; errorMessage?: string }> {
   if (!ObjectId.isValid(id)) {
-    console.warn(`Invalid ID format received: ${id}`);
-    return;
+    logger.warn("Invalid ID format received", { receivedId: id });
+    return {
+      success: false,
+      errorMessage: `Invalid ID format received: ${id}`,
+    };
   }
 
   try {
@@ -37,15 +41,21 @@ export async function updateContactRequestStatus(
       );
 
     if (updateResult.matchedCount === 0) {
-      console.warn(
-        "Could not find matching record in DB to update. Was it saved by Next.js?"
+      logger.warn(
+        "Could not find matching record in DB to update. Was it saved by Next.js?",
+        { documentId: id }
       );
     } else {
-      console.log("Successfully updated existing record with AI status.");
+      logger.debug("Successfully updated existing record with AI status.");
     }
+
+    return { success: true };
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("Database update failed:", errorMessage);
-    throw new Error(`DB Update Error: ${errorMessage}`);
+    logger.error("Database update failed", {
+      error: error instanceof Error ? error : new Error(errorMessage),
+    });
+
+    return { success: false, errorMessage: `DB Update Error: ${errorMessage}` };
   }
 }

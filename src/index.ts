@@ -1,4 +1,5 @@
-import { SQSEvent } from "aws-lambda";
+import { SQSEvent, Context } from "aws-lambda";
+import { logger } from "./logger";
 import { classifyRequest } from "./bedrock";
 import { processTelegramNotification } from "./telegram";
 import { updateContactRequestStatus } from "./db";
@@ -7,12 +8,18 @@ import { parseAndValidateRequest } from "./validator";
 import { successResponse, errorResponse } from "./response";
 import { loadAndValidateConfig } from "./config";
 
-export const handler = async (event: SQSEvent): Promise<LambdaResponse> => {
+export const handler = async (
+  event: SQSEvent,
+  context: Context
+): Promise<LambdaResponse> => {
+  logger.addContext(context);
+
   try {
+    logger.info("Step 1: Checking configuration");
     const config = loadAndValidateConfig();
 
     if (!config.success) {
-      console.error(config.errorMessage);
+      logger.error("Configuration Error", { missingVars: config.errorMessage });
       return errorResponse(500, "Internal Server Configuration Error.");
     }
 
@@ -20,40 +27,59 @@ export const handler = async (event: SQSEvent): Promise<LambdaResponse> => {
 
     const record = event.Records[0];
 
+    logger.info("Step 2: Parsing request data", {
+      messageId: record.messageId,
+    });
     const validation = parseAndValidateRequest(record.body);
 
     if (!validation.success) {
+      logger.warn("Validation Error", {
+        error: validation.errorMessage,
+        payload: record.body,
+      });
       return errorResponse(400, validation.errorMessage);
     }
 
     const { message, email, name, id } = validation.data;
 
+    logger.info("Request validated successfully", { id, email });
+
+    logger.info("Step 3: Starting Bedrock classification request");
     const { status, reason } = await classifyRequest({ message, email, name });
+    logger.info("Classification successful", { status, reason });
 
-    await updateContactRequestStatus({ id, status, reason }, MONGODB_URI);
+    logger.info("Step 4: Starting database update", { documentId: id });
+    const dbResult = await updateContactRequestStatus(
+      { id, status, reason },
+      MONGODB_URI
+    );
 
+    if (!dbResult.success) {
+      logger.error("Database Update Failed", { error: dbResult.errorMessage });
+    } else {
+      logger.info("Database update completed");
+    }
+
+    logger.info("Step 5: Starting Telegram notification");
     const telegramResult = await processTelegramNotification(
-      {
-        message,
-        status,
-        reason,
-        email,
-        name,
-      },
+      { message, status, reason, email, name },
       { botToken: TELEGRAM_BOT_TOKEN, chatId: TELEGRAM_CHAT_ID }
     );
 
     if (!telegramResult.success) {
-      return errorResponse(
-        502,
-        telegramResult.errorMessage || "Telegram Error"
-      );
+      logger.error("Telegram Notification Error", {
+        error: telegramResult.errorMessage,
+      });
+    } else {
+      logger.info("Telegram notification completed");
     }
 
     return successResponse();
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("Internal Lambda Error:", errorMessage);
+    logger.error("Internal Lambda Error (Unhandled Exception)", {
+      error: error instanceof Error ? error : new Error(errorMessage),
+    });
     return errorResponse(500, "Internal Server Error.");
   }
 };

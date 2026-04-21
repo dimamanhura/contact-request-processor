@@ -4,6 +4,7 @@ import {
   TelegramConfig,
   StatusConfig,
 } from "./types";
+import { logger } from "./logger";
 
 const STATUS_MAP: Partial<Record<ContactRequestStatus, StatusConfig>> = {
   [ContactRequestStatus.CRITICAL]: {
@@ -50,6 +51,9 @@ export const processTelegramNotification = async (
   config: TelegramConfig
 ): Promise<{ success: boolean; errorMessage?: string }> => {
   if (!NOTIFIABLE_STATUSES.has(params.status)) {
+    logger.info("Skipping Telegram notification", {
+      ignoredStatus: params.status,
+    });
     return { success: true };
   }
 
@@ -73,17 +77,24 @@ export const processTelegramNotification = async (
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error("Telegram API Error:", errorData);
+      logger.error("Telegram API Error", {
+        httpStatus: response.status,
+        telegramResponse: errorData,
+        chatId: config.chatId,
+      });
       return {
         success: false,
         errorMessage: "Failed to forward message to Telegram.",
       };
     }
 
+    logger.debug("Telegram message sent successfully");
     return { success: true };
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("Telegram Network Error:", errorMessage);
+    logger.error("Telegram Network Error", {
+      error: error instanceof Error ? error : new Error(errorMessage),
+    });
     return {
       success: false,
       errorMessage: "Internal error while contacting Telegram.",

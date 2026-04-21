@@ -13,6 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.33.0",
     "mongodb": "^6.21.0"
   },
   "devDependencies": {
