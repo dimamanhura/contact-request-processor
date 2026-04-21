@@ -7,7 +7,7 @@ export const parseAndValidateRequest = (
 
   try {
     parsed = JSON.parse(bodyString);
-  } catch (error) {
+  } catch {
     return { success: false, errorMessage: "Malformed JSON payload." };
   }
 
