@@ -22,13 +22,24 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        # Make sure @aws-sdk is in devDependencies in package.json so this command ignores it!
-        run: npm ci --production
+        # Use npm ci to install all dependencies (including devDependencies for TS/ESLint)
+        run: npm ci
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Prepare Production Dependencies
+        # Prune devDependencies before zipping to keep the Lambda package small
+        run: npm prune --production
 
       - name: Zip Lambda function
         run: |
-          cd src
-          cp -r ../node_modules .
+          # Copy production node_modules into the dist folder
+          cp -r node_modules dist/
+          cd dist
           zip -r ../deploy.zip .
           cd ..
 
@@ -40,8 +51,8 @@ jobs:
           aws-region: eu-north-1
 
       - name: Deploy to AWS Lambda
-        # Using the official AWS CLI directly prevents those endless hanging loops
         run: |
+          # Note: Adjust function name logic if staging/prod have different names
           FUNCTION_NAME="${{ github.ref == 'refs/heads/main' && 'process-contact-requests' || 'process-contact-requests' }}"
           aws lambda update-function-code \
             --function-name $FUNCTION_NAME \
