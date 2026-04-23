@@ -22,17 +22,18 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        # Use npm ci to install all dependencies (including devDependencies for TS/ESLint)
         run: npm ci
 
       - name: Run Linter
         run: npm run lint
 
+      - name: Run Unit Tests and Coverage
+        run: npm run test:coverage
+
       - name: Build TypeScript
         run: npm run build
 
       - name: Prepare Production Dependencies
-        # Prune devDependencies before zipping to keep the Lambda package small
         run: npm prune --production
 
       - name: Zip Lambda function
