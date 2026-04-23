@@ -6,7 +6,7 @@ import {
   InvokeModelCommandOutput,
 } from "@aws-sdk/client-bedrock-runtime";
 import { classifyRequest } from "../index";
-import { ContactRequestStatus } from "../../types";
+import { ContactRequestClassification } from "../../types";
 import config from "../config";
 import { logger } from "../../logger";
 import * as utils from "../utils";
@@ -40,7 +40,7 @@ describe("classifyRequest", () => {
 
   it("should successfully call Bedrock, log debug events, and return the classification", async () => {
     const expectedAgentResponse = {
-      status: ContactRequestStatus.CRITICAL,
+      classification: ContactRequestClassification.CRITICAL,
       reason: "Mention of security issues.",
     };
 
@@ -79,7 +79,7 @@ describe("classifyRequest", () => {
     const result = await classifyRequest(mockParams);
 
     expect(result).toEqual({
-      status: ContactRequestStatus.GENERAL,
+      classification: ContactRequestClassification.GENERAL,
       reason: "Fallback assigned due to AI parsing error.",
     });
 
@@ -92,7 +92,7 @@ describe("classifyRequest", () => {
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(
       "Using fallback classification due to Bedrock error",
-      { fallbackStatus: ContactRequestStatus.GENERAL }
+      { fallbackClassification: ContactRequestClassification.GENERAL }
     );
   });
 
@@ -102,7 +102,7 @@ describe("classifyRequest", () => {
 
     const result = await classifyRequest(mockParams);
 
-    expect(result.status).toBe(ContactRequestStatus.GENERAL);
+    expect(result.classification).toBe(ContactRequestClassification.GENERAL);
 
     expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledWith("Bedrock Classification Error", {

@@ -1,5 +1,5 @@
 import { MongoClient, Db, ObjectId } from "mongodb";
-import { UpdateStatusParams } from "./types";
+import { UpdateClassificationParams } from "./types";
 import { logger } from "./logger";
 
 let cachedDb: Db | null = null;
@@ -18,8 +18,8 @@ export async function connectToDatabase(uri: string): Promise<Db> {
   return cachedDb;
 }
 
-export async function updateContactRequestStatus(
-  { id, status, reason }: UpdateStatusParams,
+export async function updateContactRequestClassification(
+  { id, classification, reason }: UpdateClassificationParams,
   uri: string
 ): Promise<{ success: boolean; errorMessage?: string }> {
   if (!ObjectId.isValid(id)) {
@@ -37,7 +37,7 @@ export async function updateContactRequestStatus(
       .collection("ContactRequest")
       .updateOne(
         { _id: ObjectId.createFromHexString(id) },
-        { $set: { status, reason } }
+        { $set: { classification, reason } }
       );
 
     if (updateResult.matchedCount === 0) {
@@ -46,7 +46,9 @@ export async function updateContactRequestStatus(
         { documentId: id }
       );
     } else {
-      logger.debug("Successfully updated existing record with AI status.");
+      logger.debug(
+        "Successfully updated existing record with AI classification."
+      );
     }
 
     return { success: true };

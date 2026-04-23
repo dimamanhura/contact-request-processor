@@ -3,8 +3,8 @@ import {
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
 import {
+  ContactRequestClassification,
   ClassifyRequestParams,
-  ContactRequestStatus,
   ClassificationResult,
 } from "../types";
 import systemPrompt from "./system-prompt";
@@ -56,11 +56,11 @@ export async function classifyRequest({
     });
 
     logger.warn("Using fallback classification due to Bedrock error", {
-      fallbackStatus: ContactRequestStatus.GENERAL,
+      fallbackClassification: ContactRequestClassification.GENERAL,
     });
 
     return {
-      status: ContactRequestStatus.GENERAL,
+      classification: ContactRequestClassification.GENERAL,
       reason: "Fallback assigned due to AI parsing error.",
     };
   }

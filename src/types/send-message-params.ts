@@ -1,9 +1,9 @@
-import { ContactRequestStatus } from "./contact-request-status";
+import { ContactRequestClassification } from "./contact-request-classification";
 
 export interface SendMessageParams {
+  classification: ContactRequestClassification;
   message: string;
   email: string;
   name: string;
-  status: ContactRequestStatus;
   reason: string;
 }

@@ -1,4 +1,4 @@
-export enum ContactRequestStatus {
+export enum ContactRequestClassification {
   SPAM = "spam",
   SOLICITATION = "solicitation",
   GENERAL = "general",

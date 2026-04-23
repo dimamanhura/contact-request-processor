@@ -1,6 +1,6 @@
-import { ContactRequestStatus } from "./contact-request-status";
+import { ContactRequestClassification } from "./contact-request-classification";
 
 export interface ClassificationResult {
-  status: ContactRequestStatus;
+  classification: ContactRequestClassification;
   reason: string;
 }

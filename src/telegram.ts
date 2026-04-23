@@ -1,31 +1,43 @@
 import {
-  ContactRequestStatus,
+  ContactRequestClassification,
+  ClassificationConfig,
   SendMessageParams,
   TelegramConfig,
-  StatusConfig,
 } from "./types";
 import { logger } from "./logger";
 
-const STATUS_MAP: Partial<Record<ContactRequestStatus, StatusConfig>> = {
-  [ContactRequestStatus.CRITICAL]: {
+const CLASSIFICATION_MAP: Partial<
+  Record<ContactRequestClassification, ClassificationConfig>
+> = {
+  [ContactRequestClassification.CRITICAL]: {
     label: "🚨 CRITICAL INQUIRY",
     silent: false,
   },
-  [ContactRequestStatus.GENERAL]: { label: "📩 NEW CONTACT", silent: true },
-  [ContactRequestStatus.SOLICITATION]: {
+  [ContactRequestClassification.GENERAL]: {
+    label: "📩 NEW CONTACT",
+    silent: true,
+  },
+  [ContactRequestClassification.SOLICITATION]: {
     label: "📁 SOLICITATION / PITCH",
     silent: true,
   },
 };
 
-const NOTIFIABLE_STATUSES = new Set([
-  ContactRequestStatus.CRITICAL,
-  ContactRequestStatus.GENERAL,
-  ContactRequestStatus.SOLICITATION,
+const NOTIFIABLE_CLASSIFICATIONS = new Set([
+  ContactRequestClassification.CRITICAL,
+  ContactRequestClassification.GENERAL,
+  ContactRequestClassification.SOLICITATION,
 ]);
 
-const getStatusConfig = (status: ContactRequestStatus): StatusConfig => {
-  return STATUS_MAP[status] ?? { label: "🔍 UNKNOWN CATEGORY", silent: true };
+const getClassificationConfig = (
+  classification: ContactRequestClassification
+): ClassificationConfig => {
+  return (
+    CLASSIFICATION_MAP[classification] ?? {
+      label: "🔍 UNKNOWN CATEGORY",
+      silent: true,
+    }
+  );
 };
 
 const buildMarkdownText = (
@@ -36,7 +48,7 @@ const buildMarkdownText = (
     `${label}\n`,
     `*From:* ${params.name}`,
     `*Email:* ${params.email}`,
-    `*AI Classification:* \`${params.status.toUpperCase()}\`\n`,
+    `*AI Classification:* \`${params.classification.toUpperCase()}\`\n`,
     `*AI Reasoning:*`,
     `_${params.reason}_\n`,
     `*Message:*`,
@@ -50,14 +62,14 @@ export const processTelegramNotification = async (
   params: SendMessageParams,
   config: TelegramConfig
 ): Promise<{ success: boolean; errorMessage?: string }> => {
-  if (!NOTIFIABLE_STATUSES.has(params.status)) {
+  if (!NOTIFIABLE_CLASSIFICATIONS.has(params.classification)) {
     logger.info("Skipping Telegram notification", {
-      ignoredStatus: params.status,
+      ignoredClassification: params.classification,
     });
     return { success: true };
   }
 
-  const { label, silent } = getStatusConfig(params.status);
+  const { label, silent } = getClassificationConfig(params.classification);
   const text = buildMarkdownText(params, label);
 
   try {

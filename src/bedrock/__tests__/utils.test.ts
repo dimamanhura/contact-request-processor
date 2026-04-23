@@ -9,7 +9,7 @@ describe("extractAgentResponse", () => {
 
   it("should successfully parse a clean JSON response", () => {
     const expectedResult = {
-      status: "GENERAL",
+      classification: "GENERAL",
       reason: "Standard inquiry without urgency.",
     };
 
@@ -28,7 +28,7 @@ describe("extractAgentResponse", () => {
 
   it("should successfully strip markdown formatting and parse the JSON", () => {
     const expectedResult = {
-      status: "SPAM",
+      classification: "SPAM",
       reason: "Contains suspicious links.",
     };
 

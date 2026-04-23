@@ -35,9 +35,9 @@ contact-request-processor/
 └── README.md
 ```
 
-## 🧠 Classification Logic (AI Statuses)
+## 🧠 Classification Logic (AI Classifications)
 
-| Status              | Description                      | Action                                 |
+| Classification      | Description                      | Action                                 |
 | :------------------ | :------------------------------- | :------------------------------------- |
 | **critical**        | Urgent business or site issues   | Save to DB + **Urgent Telegram Alert** |
 | **general**         | Networking or standard inquiries | Save to DB + Standard Telegram Alert   |
@@ -60,7 +60,7 @@ The Bedrock integration uses a strict system prompt to ensure the output is alwa
 
 ```json
 {
-  "status": "critical | general | solicitation | spam | no_reply_needed",
+  "classification": "critical | general | solicitation | spam | no_reply_needed",
   "reason": "short explanation"
 }
 ```

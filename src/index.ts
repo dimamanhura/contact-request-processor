@@ -2,7 +2,7 @@ import { SQSEvent, Context } from "aws-lambda";
 import { logger } from "./logger";
 import { classifyRequest } from "./bedrock";
 import { processTelegramNotification } from "./telegram";
-import { updateContactRequestStatus } from "./db";
+import { updateContactRequestClassification } from "./db";
 import { LambdaResponse } from "./types";
 import { parseAndValidateRequest } from "./validator";
 import { successResponse, errorResponse } from "./response";
@@ -45,12 +45,16 @@ export const handler = async (
     logger.info("Request validated successfully", { id, email });
 
     logger.info("Step 3: Starting Bedrock classification request");
-    const { status, reason } = await classifyRequest({ message, email, name });
-    logger.info("Classification successful", { status, reason });
+    const { classification, reason } = await classifyRequest({
+      message,
+      email,
+      name,
+    });
+    logger.info("Classification successful", { classification, reason });
 
     logger.info("Step 4: Starting database update", { documentId: id });
-    const dbResult = await updateContactRequestStatus(
-      { id, status, reason },
+    const dbResult = await updateContactRequestClassification(
+      { id, classification, reason },
       MONGODB_URI
     );
 
@@ -62,7 +66,7 @@ export const handler = async (
 
     logger.info("Step 5: Starting Telegram notification");
     const telegramResult = await processTelegramNotification(
-      { message, status, reason, email, name },
+      { message, classification, reason, email, name },
       { botToken: TELEGRAM_BOT_TOKEN, chatId: TELEGRAM_CHAT_ID }
     );
 
