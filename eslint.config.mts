@@ -15,6 +15,7 @@ export default tseslint.config(
       },
     },
     rules: {
+      "@typescript-eslint/unbound-method": "off",
       "@typescript-eslint/no-explicit-any": "warn",
       "no-console": ["error", { allow: ["warn", "error", "info", "log"] }],
       eqeqeq: ["error", "always"],

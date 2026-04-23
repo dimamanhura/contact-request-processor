@@ -1,3 +1,4 @@
+import { InvokeModelCommandOutput } from "@aws-sdk/client-bedrock-runtime";
 import { describe, it, expect } from "vitest";
 import { extractAgentResponse } from "../utils";
 
@@ -18,7 +19,7 @@ describe("extractAgentResponse", () => {
 
     const response = {
       body: encodeBody(mockBedrockResponse),
-    } as any;
+    } as InvokeModelCommandOutput;
 
     const result = extractAgentResponse(response);
 
@@ -41,7 +42,7 @@ describe("extractAgentResponse", () => {
 
     const response = {
       body: encodeBody(mockBedrockResponse),
-    } as any;
+    } as InvokeModelCommandOutput;
 
     const result = extractAgentResponse(response);
 
@@ -49,7 +50,7 @@ describe("extractAgentResponse", () => {
   });
 
   it("should throw an Error if the response body is entirely missing", () => {
-    const response = {} as any;
+    const response = {} as InvokeModelCommandOutput;
 
     expect(() => extractAgentResponse(response)).toThrow(
       "Received empty response body from Bedrock"
@@ -63,7 +64,7 @@ describe("extractAgentResponse", () => {
 
     const response = {
       body: encodeBody(mockBedrockResponse),
-    } as any;
+    } as InvokeModelCommandOutput;
 
     expect(() => extractAgentResponse(response)).toThrow(SyntaxError);
   });
@@ -77,7 +78,7 @@ describe("extractAgentResponse", () => {
 
     const response = {
       body: encodeBody(mockBedrockResponse),
-    } as any;
+    } as InvokeModelCommandOutput;
 
     expect(() => extractAgentResponse(response)).toThrow(SyntaxError);
   });

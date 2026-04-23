@@ -59,7 +59,7 @@ describe("parseAndValidateRequest", () => {
   requiredFields.forEach((field) => {
     it(`should return an error if '${field}' is completely missing`, () => {
       const badPayload = { ...validPayload };
-      delete badPayload[field as keyof typeof badPayload];
+      delete badPayload[field];
 
       const result = parseAndValidateRequest(JSON.stringify(badPayload));
 

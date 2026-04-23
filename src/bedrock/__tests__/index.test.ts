@@ -3,6 +3,7 @@ import { mockClient } from "aws-sdk-client-mock";
 import {
   BedrockRuntimeClient,
   InvokeModelCommand,
+  InvokeModelCommandOutput,
 } from "@aws-sdk/client-bedrock-runtime";
 import { classifyRequest } from "../index";
 import { ContactRequestStatus } from "../../types";
@@ -45,10 +46,10 @@ describe("classifyRequest", () => {
 
     bedrockMock.on(InvokeModelCommand).resolves({
       $metadata: { httpStatusCode: 200 },
-      body: new Uint8Array() as any,
+      body: new Uint8Array() as unknown as InvokeModelCommandOutput["body"],
     });
 
-    vi.spyOn(utils, "extractAgentResponse").mockReturnValue(
+    vi.mocked(utils.extractAgentResponse).mockReturnValue(
       expectedAgentResponse
     );
 
