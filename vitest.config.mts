@@ -2,17 +2,16 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    passWithNoTests: true,
     globals: true,
     environment: "node",
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
       thresholds: {
-        lines: 60,
-        functions: 60,
-        branches: 60,
-        statements: 60,
+        lines: 95,
+        functions: 95,
+        branches: 95,
+        statements: 95,
       },
     },
   },

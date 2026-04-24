@@ -29,7 +29,7 @@ const NOTIFIABLE_CLASSIFICATIONS = new Set([
   ContactRequestClassification.SOLICITATION,
 ]);
 
-const getClassificationConfig = (
+export const getClassificationConfig = (
   classification: ContactRequestClassification
 ): ClassificationConfig => {
   return (

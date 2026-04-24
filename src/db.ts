@@ -4,6 +4,10 @@ import { logger } from "./logger";
 
 let cachedDb: Db | null = null;
 
+export const _resetCache = () => {
+  cachedDb = null;
+};
+
 export async function connectToDatabase(uri: string): Promise<Db> {
   if (cachedDb) {
     return cachedDb;
