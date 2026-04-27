@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'develop' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -53,8 +53,6 @@ jobs:
 
       - name: Deploy to AWS Lambda
         run: |
-          # Note: Adjust function name logic if staging/prod have different names
-          FUNCTION_NAME="${{ github.ref == 'refs/heads/main' && 'process-contact-requests' || 'process-contact-requests' }}"
           aws lambda update-function-code \
-            --function-name $FUNCTION_NAME \
+            --function-name ${{ vars.FUNCTION_NAME }} \
             --zip-file fileb://deploy.zip
