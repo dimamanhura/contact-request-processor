@@ -14,7 +14,7 @@ An event-driven microservice designed to decouple contact form processing from t
 
 - **Runtime:** Node.js 20.x (CommonJS)
 - **Queue:** AWS SQS
-- **AI/ML:** Amazon Bedrock (anthropic.claude-3-5-haiku)
+- **AI/ML:** Amazon Bedrock (anthropic.claude-4-5-haiku)
 - **Database:** MongoDB
 - **Notifications:** Telegram Bot API
 - **Deployment:** GitHub Actions
